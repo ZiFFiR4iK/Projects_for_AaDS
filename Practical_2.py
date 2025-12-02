@@ -776,6 +776,130 @@ class RBTree:
 
 # ────────────────────────────────ТЕСТИРОВАНИЕ────────────────────────────────
 
+def experiment_tree_heights():
+    """
+    Экспериментальное исследование зависимости высоты деревьев от количества ключей
+    """
+    import sys
+    sys.setrecursionlimit(50000)
+    
+    print("\n" + "="*70)
+    print("Экспериментальное исследование высоты деревьев")
+    print("="*70)
+    
+    sizes = list(range(1000, 10001, 200))  # 46 точек от 1000 до 10000
+    
+    # Результаты
+    bst_heights = []
+    avl_random_heights = []
+    rb_random_heights = []
+    avl_monotone_heights = []
+    rb_monotone_heights = []
+    
+    print("Выполняем эксперименты...")
+    for i, n in enumerate(sizes):
+        if i % 5 == 0:
+            print(f"Прогресс: {i*200} ключей...")
+        
+        # Случайные уникальные ключи
+        random_keys = random.sample(range(1, n * 10), n)
+        
+        # BST
+        bst = BST()
+        for k in random_keys:
+            bst.insert(k)
+        bst_heights.append(bst.height())
+        
+        # AVL
+        avl = AVLTree()
+        for k in random_keys:
+            avl.insert(k)
+        avl_random_heights.append(avl.height())
+        
+        # RB
+        rb = RBTree()
+        for k in random_keys:
+            rb.insert(k)
+        rb_random_heights.append(rb.height())
+        
+        # Монотонные ключи
+        monotone_keys = list(range(1, n + 1))
+        
+        # AVL монотонные
+        avl_mono = AVLTree()
+        for k in monotone_keys:
+            avl_mono.insert(k)
+        avl_monotone_heights.append(avl_mono.height())
+        
+        # RB монотонные
+        rb_mono = RBTree()
+        for k in monotone_keys:
+            rb_mono.insert(k)
+        rb_monotone_heights.append(rb_mono.height())
+    
+    # Теоретические оценки
+    logn = [math.log2(n) for n in sizes]
+    avl_upper = [1.44 * math.log2(n + 2) - 0.328 for n in sizes]
+    rb_upper = [2 * math.log2(n + 1) for n in sizes]
+    
+    # ------------------------------------------------------------
+    # ГРАФИК 1: BST при случайных ключах (только эксперимент и log₂(n))
+    # ------------------------------------------------------------
+    plt.figure(figsize=(10, 6))
+    plt.plot(sizes, bst_heights, 'b-', linewidth=2, label='BST (эксперимент)')
+    plt.plot(sizes, logn, 'g:', linewidth=1, label='log₂(n)')
+    
+    plt.title('BST: высота при случайных ключах', fontsize=14)
+    plt.xlabel('Количество ключей (n)', fontsize=12)
+    plt.ylabel('Высота дерева (h)', fontsize=12)
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.ylim(0, max(bst_heights) * 1.2)
+    plt.tight_layout()
+    plt.show()
+    
+    # ------------------------------------------------------------
+    # ГРАФИК 2: AVL и RB при случайных ключах (увеличенный масштаб)
+    # ------------------------------------------------------------
+    plt.figure(figsize=(10, 6))
+    plt.plot(sizes, avl_random_heights, 'g-', linewidth=2, label='AVL (эксперимент)')
+    plt.plot(sizes, rb_random_heights, 'r-', linewidth=2, label='RB (эксперимент)')
+    plt.plot(sizes, avl_upper, 'g--', linewidth=1.5, alpha=0.7, label='AVL: верхняя граница')
+    plt.plot(sizes, rb_upper, 'r--', linewidth=1.5, alpha=0.7, label='RB: верхняя граница')
+    plt.plot(sizes, logn, 'k:', linewidth=1, alpha=0.5, label='log₂(n) (нижняя граница)')
+    
+    plt.title('AVL и RB: случайные ключи', fontsize=14)
+    plt.xlabel('Количество ключей (n)', fontsize=12)
+    plt.ylabel('Высота дерева (h)', fontsize=12)
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
+    # Увеличиваем масштаб по вертикали в 1.5 раза
+    y_max = max(max(avl_random_heights), max(rb_random_heights), max(avl_upper), max(rb_upper)) * 1.5
+    plt.ylim(0, y_max)
+    plt.tight_layout()
+    plt.show()
+    
+    # ------------------------------------------------------------
+    # ГРАФИК 3: AVL и RB при монотонных ключах
+    # ------------------------------------------------------------
+    plt.figure(figsize=(10, 6))
+    plt.plot(sizes, avl_monotone_heights, 'g-', linewidth=2, label='AVL (монотонные)')
+    plt.plot(sizes, rb_monotone_heights, 'r-', linewidth=2, label='RB (монотонные)')
+    plt.plot(sizes, avl_upper, 'g--', linewidth=1.5, alpha=0.7, label='AVL: верхняя граница')
+    plt.plot(sizes, rb_upper, 'r--', linewidth=1.5, alpha=0.7, label='RB: верхняя граница')
+    plt.plot(sizes, logn, 'k:', linewidth=1, alpha=0.5, label='log₂(n) (нижняя граница)')
+    
+    plt.title('AVL и RB: монотонно возрастающие ключи', fontsize=14)
+    plt.xlabel('Количество ключей (n)', fontsize=12)
+    plt.ylabel('Высота дерева (h)', fontsize=12)
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    y_max_mono = max(max(avl_monotone_heights), max(rb_monotone_heights)) * 1.5
+    plt.ylim(0, y_max_mono)
+    plt.tight_layout()
+    plt.show()
+
 def test_trees():
     """Демонстрация работы всех трёх деревьев"""
     print("\n" + "="*70)
@@ -833,3 +957,6 @@ def test_trees():
 if __name__ == "__main__":
     # Демонстрация работы деревьев
     test_trees()
+    
+    # Экспериментальное исследование высоты деревьев
+    experiment_tree_heights()
