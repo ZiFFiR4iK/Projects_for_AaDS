@@ -717,6 +717,22 @@ class RBTree:
             return 0
         return 1 + max(self._get_height(node.left), self._get_height(node.right))
     
+    def set_colors(self, color_map):
+        """
+        color_map: словарь {ключ: 'RED' или 'BLACK'}
+        """
+        def dfs(node):
+            if node == self.NIL:
+                return
+            if node.key in color_map:
+                node.color = color_map[node.key]
+            dfs(node.left)
+            dfs(node.right)
+
+        dfs(self.root)
+        # self.root.color = 'BLACK'
+
+    
     # ────────────────────────────────МЕТОДЫ ОБХОДА ДЛЯ RBTree────────────────────────────────
     
     def in_order(self):
@@ -906,7 +922,7 @@ def test_trees():
     print("ДЕМОНСТРАЦИЯ РАБОТЫ ДЕРЕВЬЕВ")
     print("="*70)
     
-    keys = [50, 30, 70, 20, 40, 60, 80, 35, 65]
+    keys = [100, 50, 200, 25, 75, 60, 80, 55, 65, 53, 58]
     
     print("\n БИНАРНОЕ ДЕРЕВО ПОИСКА (BST)")
     print("-" * 70)
@@ -935,9 +951,25 @@ def test_trees():
     
     print("\n КРАСНО-ЧЁРНОЕ ДЕРЕВО")
     print("-" * 70)
-    rb = RBTree()
+    rb = RBTree()  # ← СОЗДАЁМ СНАЧАЛА
     for key in keys:
         rb.insert(key)
+    
+    # ← ПОТОМ УСТАНАВЛИВАЕМ ЦВЕТА
+    color_map = {
+        100: 'BLACK',
+        50:  'RED',
+        200: 'BLACK',
+        25:  'BLACK',
+        75:  'BLACK',
+        60:  'RED',
+        80:  'RED',
+        55:  'BLACK',
+        65:  'BLACK',
+        53:  'BLACK',
+        58:  'BLACK',
+    }
+    rb.set_colors(color_map)
     
     print(f"Высота РБ: {rb.height()}")
     print(f"In-order: {rb.in_order()}")
@@ -947,12 +979,18 @@ def test_trees():
     print("\n" + "="*70)
     print("ОПЕРАЦИЯ УДАЛЕНИЯ (BST)")
     print("-" * 70)
-    
-    # Удаление элемента из BST
-    print(f"До удаления 40: {bst.in_order()}")
+    print(f"До удаления 40 (BST): {bst.in_order()}")
     bst.delete(40)
-    print(f"После удаления 40: {bst.in_order()}")
-    print(f"Поиск 40: {bst.search(40)}")
+    print(f"После удаления 40 (BST): {bst.in_order()}")
+    print(f"Поиск 40 (BST): {bst.search(40)}")
+
+    print("\n" + "="*70)
+    print("ОПЕРАЦИЯ УДАЛЕНИЯ (RBTree)")
+    print("-" * 70)
+    print(f"До удаления 50 (RB): {rb.in_order()}")
+    rb.delete(50)
+    print(f"После удаления 50 (RB): {rb.in_order()}")
+    print(f"Поиск 50 (RB): {rb.search(50)}")
 
 if __name__ == "__main__":
     # Демонстрация работы деревьев
